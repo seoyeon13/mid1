@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>떡 하나 주면 안 잡아먹지</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<h1>떡 하나 주면 안 잡아먹지</h1>
+	<div id="display"></div>
+	<div id="gameBoard"></div>
+	<p>방향키로 움직여주세요!</p>
+
+	<div id="popup" style="display: none;">
+		<div id="popup-content">
+		<h1>어흥! 떡 하나 주면 안 잡아먹지</h1>
+		<p>인절미를 만들자</p>
+		<img src="example.png" class="ex-pic">
+		<p>(이런 식으로 떨어지는 것중에서 필요한 재료만 받아야<br>통과할 수 있게 하려고 합니다)</p>
+		<button id="close-popup">성공!</button>
+		</div>
+	</div>
+
+<script>
+	let myName = prompt("당신의 이름은?","해님달")
+	let text = "안녕하세요, " + myName + "님!<br>제가 호랑이에게 잡아먹히지 않고 집에 갈 수 있게 도와주시겠어요?"
+	document.getElementById('display').innerHTML = text;
+
+	const maze = [
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	[1, 0, 0, 0, 1, 1, 1, 1, 0, 1],
+	[1, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+	[1, 0, 1, 1, 1, 0, 1, 0, 0, 1],
+	[1, 0, 1, 1, 1, 0, 1, 1, 0, 1],
+	[1, 0, 0, 1, 1, 0, 0, 0, 0, 1],
+	[1, 1, 0, 0, 1, 0, 1, 1, 1, 1],
+	[1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
+	[1, 0, 0, 0, 1, 1, 1, 0, 0, 1],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
+
+	const player = { x: 1, y: 1 };
+	const goal = { x: 8, y: 8 };
+	const tigers = [{ x: 5, y: 2 }, 
+		{ x: 2, y: 6 }, 
+ 		{ x: 8, y: 5 },
+ 		{ x: 1, y: 8 } ];
+
+	const gameBoard = document.getElementById('gameBoard');
+
+	let previousPosition = { x: player.x, y: player.y };
+
+	function drawMaze() {
+	gameBoard.innerHTML = ''; 
+	for (let y = 0; y < maze.length; y++) {
+		for (let x = 0; x < maze[y].length; x++) { 
+			const tile = document.createElement('div');
+			tile.classList.add('tile');
+				if (maze[y][x] === 1) {
+					tile.classList.add('wall');}
+					else if (x === player.x && y === player.y) {
+					tile.classList.add('player');}
+					else if (x === goal.x && y === goal.y) {
+					tile.classList.add('home');
+					tile.textContent = 'MY HOME!';}
+					else if (isTigerHere(x, y)) {
+					tile.classList.add('tiger');} 
+					else {tile.classList.add('path');}
+			gameBoard.appendChild(tile);}
+    	}
+	}
+
+	function movePlayer(dx, dy) {
+		const newX = player.x + dx;
+		const newY = player.y + dy;
+			if (maze[newY][newX] === 0) {
+				player.x = newX;
+				player.y = newY;
+				drawMaze();
+				checkWin();
+				checkTiger();}
+	}
+
+	function checkTiger() {
+		if (tigers.some(tiger => tiger.x === player.x && tiger.y === player.y)) {
+		previousPosition = { x: player.x, y: player.y };
+		document.getElementById('popup').style.display = 'flex';}
+	}
+
+  document.getElementById('close-popup').addEventListener('click', function() {
+    document.getElementById('popup').style.display = 'none';
+    player.x = previousPosition.x;
+    player.y = previousPosition.y;
+    drawMaze();
+  });
+
+	function isTigerHere(x, y) {
+		return tigers.some(tiger => tiger.x === x && tiger.y === y);}
+	
+	function checkWin() {
+		if (player.x === goal.x && player.y === goal.y) {
+			alert('우와! 집이다!');
+			window.location.href = 'new.html';}
+	}
+
+	document.addEventListener('keydown', (e) => {
+		switch (e.key) {
+	      case 'ArrowUp':
+	        movePlayer(0, -1);
+	        break;
+	      case 'ArrowDown':
+	        movePlayer(0, 1);
+	        break;
+	      case 'ArrowLeft':
+	        movePlayer(-1, 0);
+	        break;
+	      case 'ArrowRight':
+	        movePlayer(1, 0);
+	        break;}
+	});
+
+  drawMaze();
+</script>
+
+</body>
+</html>
